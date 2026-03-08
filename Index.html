@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElectroLab — Processos de Eletrização</title>
+<link href="https://fonts.googleapis.com/css2?family=Electrolize&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-deep:#030810;
+  --bg-panel:#07101f;
+  --bg-card:#0c1727;
+  --bg-hover:#101e32;
+  --accent:#00d4ff;
+  --accent2:#0099bb;
+  --accent-glow:rgba(0,212,255,0.35);
+  --positive:#ff6b6b;
+  --negative:#74b9ff;
+  --gold:#ffd700;
+  --text-primary:#e8f4fe;
+  --text-secondary:#6a90b0;
+  --border:rgba(0,212,255,0.13);
+  --sidebar-w:300px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg-deep);color:var(--text-primary)}
+body{display:flex;flex-direction:column;font-family:'Outfit',sans-serif}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex:1;overflow:hidden;height:calc(100vh - 42px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+width:var(–sidebar-w);min-width:var(–sidebar-w);
+background:var(–bg-panel);
+border-right:1px solid var(–border);
+display:flex;flex-direction:column;
+overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+
+.sidebar-logo{
+padding:28px 24px 20px;
+border-bottom:1px solid var(–border);
+}
+.logo-badge{
+display:inline-flex;align-items:center;gap:10px;
+margin-bottom:8px;
+}
+.logo-icon{
+width:40px;height:40px;
+background:linear-gradient(135deg,#00d4ff22,#00d4ff44);
+border:1px solid var(–accent);
+border-radius:10px;
+display:flex;align-items:center;justify-content:center;
+font-size:20px;
+box-shadow:0 0 20px var(–accent-glow);
+}
+.logo-name{
+font-family:‘Electrolize’,monospace;
+font-size:22px;letter-spacing:2px;color:var(–accent);
+text-shadow:0 0 20px var(–accent-glow);
+}
+.logo-sub{
+font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+color:var(–text-secondary);margin-top:2px;
+}
+
+.sidebar-section-title{
+padding:18px 24px 10px;
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+color:var(–text-secondary);font-family:‘Space Mono’,monospace;
+}
+
+.exp-list{display:flex;flex-direction:column;gap:4px;padding:0 12px}
+.exp-item{
+display:flex;align-items:center;gap:14px;
+padding:14px 16px;border-radius:10px;
+cursor:pointer;transition:all .25s ease;
+border:1px solid transparent;
+position:relative;overflow:hidden;
+}
+.exp-item::before{
+content:’’;position:absolute;left:0;top:0;bottom:0;
+width:3px;background:var(–accent);
+transform:scaleY(0);transition:transform .25s ease;
+border-radius:0 2px 2px 0;
+}
+.exp-item:hover{background:var(–bg-hover);border-color:var(–border)}
+.exp-item.active{
+background:linear-gradient(90deg,rgba(0,212,255,0.08),transparent);
+border-color:rgba(0,212,255,0.25);
+}
+.exp-item.active::before{transform:scaleY(1)}
+.exp-icon{
+width:38px;height:38px;border-radius:8px;
+display:flex;align-items:center;justify-content:center;
+font-size:18px;flex-shrink:0;
+background:rgba(255,255,255,0.04);
+transition:all .25s ease;
+}
+.exp-item.active .exp-icon{
+background:rgba(0,212,255,0.12);
+box-shadow:0 0 12px rgba(0,212,255,0.2);
+}
+.exp-info{min-width:0}
+.exp-name{font-size:13px;font-weight:600;color:var(–text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-tag{font-size:10px;color:var(–text-secondary);margin-top:2px;font-family:‘Space Mono’,monospace}
+
+.sidebar-info{
+margin:16px 12px;padding:16px;
+background:linear-gradient(135deg,rgba(0,212,255,0.06),rgba(0,212,255,0.02));
+border:1px solid var(–border);border-radius:12px;
+}
+.info-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–accent);margin-bottom:8px;font-family:‘Space Mono’,monospace}
+.info-text{font-size:12px;color:var(–text-secondary);line-height:1.6}
+
+.level-badge{
+margin:0 12px 16px;padding:10px 16px;
+background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.2);
+border-radius:8px;display:flex;align-items:center;gap:10px;
+}
+.level-dot{width:8px;height:8px;border-radius:50%;background:#ffd700;box-shadow:0 0 8px #ffd700aa}
+.level-text{font-size:11px;color:#ffd700;font-family:‘Space Mono’,monospace}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(–bg-deep)}
+
+.exp-header{
+padding:20px 30px 16px;
+border-bottom:1px solid var(–border);
+display:flex;align-items:center;justify-content:space-between;
+background:var(–bg-panel);
+flex-shrink:0;
+}
+.exp-title-group{}
+.exp-title{font-size:20px;font-weight:700;color:var(–text-primary);font-family:‘Electrolize’,monospace;letter-spacing:1px}
+.exp-subtitle{font-size:12px;color:var(–text-secondary);margin-top:3px}
+.exp-num{
+font-family:‘Space Mono’,monospace;font-size:11px;
+color:var(–accent);background:rgba(0,212,255,0.1);
+border:1px solid rgba(0,212,255,0.25);padding:4px 10px;border-radius:20px;
+}
+
+.canvas-area{
+flex:1;position:relative;overflow:hidden;
+background:radial-gradient(ellipse at 50% 30%,#071428,#030810);
+}
+canvas{display:block;width:100%;height:100%}
+
+/* Grid pattern overlay */
+.canvas-area::before{
+content:’’;position:absolute;inset:0;pointer-events:none;
+background-image:
+linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);
+background-size:40px 40px;
+}
+
+/* ── CONTROLS ── */
+.controls{
+flex-shrink:0;
+padding:16px 30px;
+background:var(–bg-panel);
+border-top:1px solid var(–border);
+display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.step-text{
+flex:1;min-width:200px;
+font-size:13px;color:var(–text-secondary);
+line-height:1.5;
+}
+.step-text strong{color:var(–accent);font-family:‘Space Mono’,monospace;font-size:11px;display:block;margin-bottom:3px}
+
+.btn{
+padding:10px 22px;border-radius:8px;border:none;cursor:pointer;
+font-family:‘Outfit’,sans-serif;font-size:13px;font-weight:600;
+transition:all .2s ease;white-space:nowrap;letter-spacing:.5px;
+display:inline-flex;align-items:center;gap:7px;
+}
+.btn-primary{
+background:linear-gradient(135deg,#00b4d8,#0077b6);
+color:#fff;
+box-shadow:0 4px 15px rgba(0,180,216,0.35);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,180,216,0.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{
+background:rgba(255,255,255,0.05);
+border:1px solid var(–border);
+color:var(–text-secondary);
+}
+.btn-secondary:hover{background:var(–bg-hover);color:var(–text-primary);border-color:rgba(0,212,255,0.3)}
+.btn-danger{
+background:rgba(255,107,107,0.1);
+border:1px solid rgba(255,107,107,0.3);
+color:#ff6b6b;
+}
+.btn-danger:hover{background:rgba(255,107,107,0.2)}
+.btn-warning{
+background:rgba(255,214,0,0.1);
+border:1px solid rgba(255,214,0,0.3);
+color:#ffd700;
+}
+.btn-warning:hover{background:rgba(255,214,0,0.2)}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* ── THEORY PANEL ── */
+.theory-panel{
+flex-shrink:0;
+border-top:1px solid var(–border);
+background:var(–bg-panel);
+max-height:160px;overflow-y:auto;
+}
+.theory-panel::-webkit-scrollbar{height:4px;width:4px}
+.theory-panel::-webkit-scrollbar-thumb{background:var(–border)}
+.theory-toggle{
+width:100%;padding:12px 30px;
+display:flex;align-items:center;justify-content:space-between;
+background:none;border:none;cursor:pointer;color:var(–text-secondary);
+font-family:‘Outfit’,sans-serif;font-size:12px;letter-spacing:.5px;
+transition:color .2s ease;text-align:left;
+}
+.theory-toggle:hover{color:var(–text-primary)}
+.theory-toggle .arrow{transition:transform .25s ease;font-size:10px}
+.theory-toggle.open .arrow{transform:rotate(180deg)}
+.theory-content{
+padding:0 30px 16px;
+font-size:13px;color:var(–text-secondary);line-height:1.7;
+display:none;
+}
+.theory-content.visible{display:block}
+.theory-content h4{color:var(–accent);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-family:‘Space Mono’,monospace}
+.theory-content p{margin-bottom:8px}
+.theory-content .formula{
+display:inline-block;
+background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);
+border-radius:6px;padding:6px 14px;margin:6px 0;
+font-family:‘Space Mono’,monospace;color:var(–accent);font-size:12px;
+}
+
+/* ── FOOTER ── */
+.footer{
+height:42px;display:flex;align-items:center;justify-content:center;
+background:#020709;border-top:1px solid var(–border);
+font-family:‘Space Mono’,monospace;font-size:11px;
+color:var(–text-secondary);letter-spacing:2px;
+flex-shrink:0;
+}
+.footer span{color:var(–accent);opacity:.7}
+
+/* Charge badge */
+.charge-indicator{
+position:absolute;top:16px;right:20px;
+display:flex;gap:8px;
+}
+.charge-badge{
+padding:5px 12px;border-radius:20px;
+font-family:‘Space Mono’,monospace;font-size:11px;
+font-weight:700;letter-spacing:1px;
+display:flex;align-items:center;gap:5px;opacity:0;
+transition:opacity .5s ease;
+}
+.charge-badge.visible{opacity:1}
+.charge-pos{background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.4);color:#ff6b6b}
+.charge-neg{background:rgba(116,185,255,0.15);border:1px solid rgba(116,185,255,0.4);color:#74b9ff}
+.charge-neutral{background:rgba(160,174,192,0.1);border:1px solid rgba(160,174,192,0.3);color:#a0aec0}
+
+/* Pulse animation for active experiment icon */
+@keyframes pulse-border{
+0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,0)}
+50%{box-shadow:0 0 0 4px rgba(0,212,255,0.15)}
+}
+.exp-item.active{animation:pulse-border 3s infinite}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-name">ELECTROLAB</div>
+      </div>
+      <div class="logo-sub">Laboratório Virtual de Física</div>
+    </div>
+
+```
+<div class="sidebar-section-title">Experimentos</div>
+<div class="exp-list" id="expList">
+  <div class="exp-item active" data-exp="atrito">
+    <div class="exp-icon">🪨</div>
+    <div class="exp-info">
+      <div class="exp-name">Eletrização por Atrito</div>
+      <div class="exp-tag">EXP-01 · TRIBOELÉTRICO</div>
+    </div>
+  </div>
+  <div class="exp-item" data-exp="inducao">
+    <div class="exp-icon">🔮</div>
+    <div class="exp-info">
+      <div class="exp-name">Eletrização por Indução</div>
+      <div class="exp-tag">EXP-02 · ELETROSTÁTICO</div>
+    </div>
+  </div>
+  <div class="exp-item" data-exp="contato">
+    <div class="exp-icon">⚡</div>
+    <div class="exp-info">
+      <div class="exp-name">Eletrização por Contato</div>
+      <div class="exp-tag">EXP-03 · CONDUÇÃO</div>
+    </div>
+  </div>
+  <div class="exp-item" data-exp="eletroscopio">
+    <div class="exp-icon">🔬</div>
+    <div class="exp-info">
+      <div class="exp-name">Eletroscópio de Folhas</div>
+      <div class="exp-tag">EXP-04 · DETECTOR</div>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar-section-title" style="margin-top:12px">Informação</div>
+<div class="sidebar-info" id="sideInfo">
+  <div class="info-label">Sobre o experimento</div>
+  <div class="info-text" id="sideInfoText">Selecione um experimento para visualizar sua descrição.</div>
+</div>
+
+<div class="level-badge">
+  <div class="level-dot"></div>
+  <div class="level-text">ENSINO SUPERIOR</div>
+</div>
+```
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+
+  <div class="main">
+    <div class="exp-header">
+      <div class="exp-title-group">
+        <div class="exp-title" id="expTitle">ELETRIZAÇÃO POR ATRITO</div>
+        <div class="exp-subtitle" id="expSubtitle">Transferência de cargas por contato mecânico entre corpos</div>
+      </div>
+      <div class="exp-num" id="expNum">EXP-01 / 04</div>
+    </div>
+
+```
+<div class="canvas-area">
+  <canvas id="mainCanvas"></canvas>
+  <div class="charge-indicator" id="chargeIndicator"></div>
+</div>
+
+<div class="controls" id="controls">
+  <div class="step-text">
+    <strong id="stepLabel">PASSO 01</strong>
+    <span id="stepDesc">Clique em <em>Atrite o Bastão</em> para iniciar o experimento de eletrização por atrito.</span>
+  </div>
+  <div id="btnArea" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+</div>
+
+<div class="theory-panel">
+  <button class="theory-toggle" id="theoryToggle">
+    <span>📖 &nbsp;Fundamento Teórico</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="theory-content" id="theoryContent"></div>
+</div>
+```
+
+  </div>
+</div>
+
+<footer class="footer">
+  <span>@experimentajoao</span>&nbsp;|&nbsp;soluções educacionais
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  ELECTROLAB — Simulation Engine
+// ═══════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H, dpr;
+function resizeCanvas(){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  dpr = window.devicePixelRatio||1;
+  W = rect.width; H = rect.height;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.scale(dpr,dpr);
+  if(currentExp) currentExp.dirty = true;
+}
+window.addEventListener('resize', resizeCanvas);
+
+// ── Particle ──────────────────────────────────────────────
+class Particle{
+  constructor(x,y,tx,ty,color,speed,size=3){
+    this.x=x;this.y=y;this.tx=tx;this.ty=ty;
+    this.ox=x;this.oy=y;
+    this.color=color;this.speed=speed;this.size=size;
+    this.alpha=1;this.done=false;this.t=0;
+    // slight arc
+    this.cx=(x+tx)/2+(Math.random()-.5)*40;
+    this.cy=(y+ty)/2+(Math.random()-.5)*40;
+  }
+  update(){
+    this.t+=this.speed;
+    if(this.t>=1){this.done=true;return;}
+    // quadratic bezier
+    const mt=1-this.t;
+    this.x=mt*mt*this.ox+2*mt*this.t*this.cx+this.t*this.t*this.tx;
+    this.y=mt*mt*this.oy+2*mt*this.t*this.cy+this.t*this.t*this.ty;
+    if(this.t>0.7) this.alpha=1-(this.t-0.7)/0.3;
+  }
+  draw(c){
+    c.save();c.globalAlpha=this.alpha;
+    c.shadowBlur=12;c.shadowColor=this.color;
+    c.fillStyle=this.color;c.beginPath();
+    c.arc(this.x,this.y,this.size,0,Math.PI*2);c.fill();
+    c.restore();
+  }
+}
+
+// ── Drawing helpers ──────────────────────────────────────
+function drawRoundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);c.lineTo(x+w-r,y);
+  c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);
+  c.closePath();
+}
+
+function drawRod(c,cx,cy,len,thick,chargeLevel,negative){
+  // Ebonite rod (dark brownish)
+  const x=cx-len/2,y=cy-thick/2;
+  const grad=c.createLinearGradient(x,y,x,y+thick);
+  grad.addColorStop(0,'#3a1f0a');
+  grad.addColorStop(0.3,'#5c3010');
+  grad.addColorStop(0.5,'#4a2508');
+  grad.addColorStop(1,'#1a0a03');
+  c.save();
+  if(chargeLevel>0){
+    const glowColor=negative?'rgba(116,185,255,':'rgba(255,107,107,';
+    c.shadowBlur=20+chargeLevel*30;
+    c.shadowColor=glowColor+(0.4+chargeLevel*0.5)+')';
+  }
+  drawRoundRect(c,x,y,len,thick,thick/2);
+  c.fillStyle=grad;c.fill();
+  // highlight
+  const hl=c.createLinearGradient(x,y,x,y+thick*0.4);
+  hl.addColorStop(0,'rgba(255,255,255,0.18)');hl.addColorStop(1,'transparent');
+  drawRoundRect(c,x+4,y+2,len-8,thick*0.4,4);
+  c.fillStyle=hl;c.fill();
+  // charge overlay
+  if(chargeLevel>0){
+    const oc=negative?'rgba(116,185,255,':'rgba(255,107,107,';
+    drawRoundRect(c,x,y,len,thick,thick/2);
+    c.fillStyle=oc+(chargeLevel*0.2)+')';c.fill();
+  }
+  c.restore();
+}
+
+function drawGlassRod(c,cx,cy,len,thick,chargeLevel){
+  const x=cx-len/2,y=cy-thick/2;
+  c.save();
+  if(chargeLevel>0){c.shadowBlur=25+chargeLevel*20;c.shadowColor='rgba(0,212,255,'+(0.5+chargeLevel*0.4)+')';}
+  drawRoundRect(c,x,y,len,thick,thick/2);
+  const grad=c.createLinearGradient(x,y,x,y+thick);
+  grad.addColorStop(0,'rgba(100,200,255,0.55)');
+  grad.addColorStop(0.5,'rgba(0,150,210,0.35)');
+  grad.addColorStop(1,'rgba(0,100,180,0.5)');
+  c.fillStyle=grad;c.fill();
+  drawRoundRect(c,x,y,len,thick,thick/2);
+  c.strokeStyle='rgba(100,220,255,0.6)';c.lineWidth=1.5;c.stroke();
+  if(chargeLevel>0){
+    drawRoundRect(c,x,y,len,thick,thick/2);
+    c.fillStyle='rgba(0,212,255,'+(chargeLevel*0.25)+')';c.fill();
+  }
+  c.restore();
+}
+
+function drawCloth(c,cx,cy,w,h){
+  // Wool/felt cloth
+  c.save();
+  const x=cx-w/2,y=cy-h/2;
+  const grad=c.createLinearGradient(x,y,x,y+h);
+  grad.addColorStop(0,'#7c3f00');grad.addColorStop(1,'#5a2d00');
+  drawRoundRect(c,x,y,w,h,6);
+  c.fillStyle=grad;c.fill();
+  // texture dots
+  c.fillStyle='rgba(255,200,100,0.15)';
+  for(let i=0;i<20;i++){
+    const dx=x+8+Math.random()*(w-16);
+    const dy=y+8+Math.random()*(h-16);
+    c.beginPath();c.arc(dx,dy,2,0,Math.PI*2);c.fill();
+  }
+  drawRoundRect(c,x,y,w,h,6);
+  c.strokeStyle='rgba(180,100,20,0.5)';c.lineWidth=1;c.stroke();
+  c.restore();
+}
+
+function drawSphere(c,cx,cy,r,charge,chargeSymbols){
+  c.save();
+  // Metallic sphere
+  if(charge!==0){
+    const gc=charge<0?'rgba(116,185,255,':'rgba(255,107,107,';
+    c.shadowBlur=30+Math.abs(charge)*15;
+    c.shadowColor=gc+0.5+')';
+  }
+  const grad=c.createRadialGradient(cx-r*0.3,cy-r*0.3,r*0.1,cx,cy,r);
+  grad.addColorStop(0,'rgba(180,200,220,0.9)');
+  grad.addColorStop(0.5,'rgba(80,110,140,0.8)');
+  grad.addColorStop(1,'rgba(30,50,80,0.9)');
+  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);
+  c.fillStyle=grad;c.fill();
+  if(charge!==0){
+    const gc=charge<0?'rgba(116,185,255,':'rgba(255,107,107,';
+    c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);
+    c.fillStyle=gc+(Math.abs(charge)*0.18)+')';c.fill();
+  }
+  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);
+  c.strokeStyle='rgba(150,200,230,0.4)';c.lineWidth=1.5;c.stroke();
+  // charge symbols inside
+  if(chargeSymbols && chargeSymbols.length>0){
+    chargeSymbols.forEach(s=>{
+      c.fillStyle=s.type<0?'#74b9ff':'#ff6b6b';
+      c.font='bold 13px Electrolize';c.textAlign='center';c.textBaseline='middle';
+      c.fillText(s.type<0?'−':'+',s.x,s.y);
+    });
+  }
+  c.restore();
+}
+
+function drawElectroscope(c,cx,cy,leafAngle,charge){
+  c.save();
+  const W2=70,H2=120,rodsH=80,topY=cy-H2/2;
+
+  // Insulating base
+  const bgrad=c.createLinearGradient(cx-50,cy+H2/2-10,cx+50,cy+H2/2);
+  bgrad.addColorStop(0,'#3d1a00');bgrad.addColorStop(1,'#5c2800');
+  drawRoundRect(c,cx-50,cy+H2/2-12,100,22,6);
+  c.fillStyle=bgrad;c.fill();
+
+  // Glass jar
+  const jgrad=c.createLinearGradient(cx-W2/2,cy-H2/4,cx+W2/2,cy+H2/2);
+  jgrad.addColorStop(0,'rgba(100,170,210,0.1)');
+  jgrad.addColorStop(1,'rgba(60,130,180,0.08)');
+  drawRoundRect(c,cx-W2/2,cy-H2/4,W2,H2/2+H2/4+10,8);
+  c.fillStyle=jgrad;c.fill();
+  drawRoundRect(c,cx-W2/2,cy-H2/4,W2,H2/2+H2/4+10,8);
+  c.strokeStyle='rgba(100,200,255,0.4)';c.lineWidth=1.5;c.stroke();
+
+  // Metal cap
+  if(charge!==0){
+    c.shadowBlur=20+Math.abs(charge)*15;
+    c.shadowColor=charge<0?'rgba(116,185,255,0.6)':'rgba(255,107,107,0.6)';
+  }
+  drawRoundRect(c,cx-32,topY,64,18,5);
+  const capg=c.createLinearGradient(cx-32,topY,cx+32,topY+18);
+  capg.addColorStop(0,'#c0d0e0');capg.addColorStop(0.5,'#8090a0');capg.addColorStop(1,'#506070');
+  c.fillStyle=capg;c.fill();
+
+  // Metal disc (knob)
+  c.beginPath();c.ellipse(cx,topY+3,20,8,0,0,Math.PI*2);
+  c.fillStyle='#b0c4d4';c.fill();
+
+  // Vertical rod inside jar
+  c.beginPath();c.moveTo(cx,topY+18);c.lineTo(cx,cy+10);
+  c.strokeStyle='#8090a0';c.lineWidth=3;c.stroke();
+  c.shadowBlur=0;
+
+  // Gold leaves
+  c.shadowBlur=leafAngle>0.05?12:0;
+  c.shadowColor='rgba(255,214,0,0.5)';
+  const leafLen=36,pivotY=cy+10;
+  // Left leaf
+  c.save();c.translate(cx,pivotY);c.rotate(-leafAngle);
+  c.beginPath();c.moveTo(0,0);c.lineTo(0,leafLen);
+  c.strokeStyle='#ffd700';c.lineWidth=3;c.lineCap='round';c.stroke();
+  c.restore();
+  // Right leaf
+  c.save();c.translate(cx,pivotY);c.rotate(leafAngle);
+  c.beginPath();c.moveTo(0,0);c.lineTo(0,leafLen);
+  c.strokeStyle='#ffd700';c.lineWidth=3;c.lineCap='round';c.stroke();
+  c.restore();
+
+  // Charge symbol on cap
+  if(charge!==0){
+    c.font='bold 14px Electrolize';c.textAlign='center';c.textBaseline='middle';
+    c.fillStyle=charge<0?'#74b9ff':'#ff6b6b';
+    c.fillText(charge<0?'−':'+',cx,topY+9);
+  }
+  c.restore();
+}
+
+function drawGround(c,x,y){
+  c.save();c.strokeStyle='rgba(100,180,100,0.8)';c.lineWidth=2;c.setLineDash([5,4]);
+  c.beginPath();c.moveTo(x,y);c.lineTo(x,y+50);c.stroke();
+  c.setLineDash([]);
+  // Earth symbol
+  [[28,0],[20,8],[12,16]].forEach((seg,i)=>{
+    c.beginPath();c.moveTo(x-seg[0]/2,y+50+seg[1]);c.lineTo(x+seg[0]/2,y+50+seg[1]);c.stroke();
+  });
+  c.restore();
+}
+
+function drawPlusMinus(c,x,y,type,alpha=1){
+  c.save();c.globalAlpha=alpha;
+  c.font='bold 14px Electrolize';c.textAlign='center';c.textBaseline='middle';
+  c.fillStyle=type<0?'#74b9ff':'#ff6b6b';
+  c.shadowBlur=8;c.shadowColor=c.fillStyle;
+  c.fillText(type<0?'−':'+',x,y);
+  c.restore();
+}
+
+function drawLabel(c,text,x,y,color='rgba(160,190,210,0.8)'){
+  c.save();c.font='12px Outfit';c.textAlign='center';c.textBaseline='top';
+  c.fillStyle=color;c.fillText(text,x,y);c.restore();
+}
+
+function drawArrow(c,x1,y1,x2,y2,color,alpha=1){
+  c.save();c.globalAlpha=alpha;c.strokeStyle=color;c.fillStyle=color;
+  c.lineWidth=2;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+  const ang=Math.atan2(y2-y1,x2-x1);
+  c.beginPath();c.moveTo(x2,y2);
+  c.lineTo(x2-10*Math.cos(ang-0.4),y2-10*Math.sin(ang-0.4));
+  c.lineTo(x2-10*Math.cos(ang+0.4),y2-10*Math.sin(ang+0.4));
+  c.closePath();c.fill();c.restore();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPERIMENT DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+
+// ── EXP 1: ATRITO ─────────────────────────────────────────
+const expAtrito={
+  name:'ELETRIZAÇÃO POR ATRITO',
+  subtitle:'Transferência de elétrons por contato mecânico entre materiais',
+  num:'EXP-01 / 04',
+  info:'Dois materiais diferentes sofrem atrito. Elétrons se transferem do material com menor afinidade eletrônica para o de maior afinidade. Um corpo fica com excesso de elétrons (negativo) e o outro com déficit (positivo).',
+  theory:`<h4>Teoria Triboelétrica</h4>
+    <p>A eletrização por atrito (ou triboeletrização) ocorre quando dois materiais com diferentes afinidades eletrônicas são friccionados. A série triboelétrica determina qual material ganha ou perde elétrons.</p>
+    <p class="formula">Q = ne (onde n = número de elétrons transferidos, e = 1,6×10⁻¹⁹ C)</p>
+    <p>O bastão de ebonite friccionado com lã adquire carga negativa (ganha elétrons), enquanto a lã adquire carga positiva (perde elétrons). A carga total do sistema permanece conservada.</p>`,
+  phase:'idle',
+  frame:0,
+  particles:[],
+  chargeLevel:0,
+  clothX:0,clothDir:1,
+
+  init(){this.phase='idle';this.frame=0;this.particles=[];this.chargeLevel=0;},
+
+  update(dt){
+    if(this.phase==='rubbing'){
+      this.frame+=dt*55;
+      // oscillate cloth
+      this.clothX+=this.clothDir*3.5;
+      if(this.clothX>60){this.clothDir=-1;}
+      if(this.clothX<-60){this.clothDir=1;}
+      // emit electrons
+      if(Math.floor(this.frame)%6===0){
+        const cx=W/2,cy=H/2-10;
+        const rodRX=cx+this.clothX+30;
+        this.particles.push(new Particle(
+          rodRX-20+Math.random()*40,cy+Math.random()*20-10,
+          cx-30+Math.random()*50,cy+Math.random()*20-10,
+          '#74b9ff',0.025+Math.random()*0.01,3
+        ));
+      }
+      this.particles.forEach(p=>p.update());
+      this.particles=this.particles.filter(p=>!p.done);
+      this.chargeLevel=Math.min(1,this.frame/200);
+      if(this.frame>=200){this.phase='charged';this.chargeLevel=1;renderButtons();}
+    }
+  },
+
+  buttons(){
+    if(this.phase==='idle') return [{id:'atrite',label:'⚡ Atrite o Bastão',cls:'btn-primary'}];
+    if(this.phase==='charged') return [{id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'}];
+    return [{id:'reset',label:'↺ Reiniciar',cls:'btn-secondary',disabled:true}];
+  },
+
+  action(id){
+    if(id==='atrite'&&this.phase==='idle'){
+      this.phase='rubbing';this.frame=0;this.clothX=0;this.clothDir=1;
+    }
+    if(id==='reset') this.init();
+    renderButtons();renderStepDesc();
+  },
+
+  stepDesc(){
+    if(this.phase==='idle') return {label:'PASSO 01',text:'Clique em <em>Atrite o Bastão</em> para iniciar o experimento de eletrização por atrito entre a ebonite e a lã.'};
+    if(this.phase==='rubbing') return {label:'EM ANDAMENTO',text:'Observe a transferência de elétrons (azul) da lã para o bastão de ebonite durante o atrito...'};
+    return {label:'RESULTADO',text:'O bastão adquiriu <strong style="color:#74b9ff">carga negativa</strong> (ganhou elétrons) e a lã adquiriu <strong style="color:#ff6b6b">carga positiva</strong> (perdeu elétrons). A carga total do sistema permanece nula.'};
+  },
+
+  chargeHtml(){
+    if(this.phase!=='charged') return '';
+    return `<div class="charge-badge charge-neg visible">⊖ BASTÃO NEGATIVO</div>
+            <div class="charge-badge charge-pos visible">⊕ LÃ POSITIVA</div>`;
+  },
+
+  draw(){
+    const cx=W/2,cy=H/2-10;
+    const rodLen=220,rodThick=28;
+    const clothW=70,clothH=50;
+    const clothOffX=this.phase==='rubbing'?this.clothX:0;
+
+    // Draw rod
+    const rodCharge=this.phase==='charged'?1:this.chargeLevel;
+    drawRod(ctx,cx,cy,rodLen,rodThick,rodCharge,true);
+    drawLabel(ctx,'Bastão de Ebonite',cx,cy+rodThick/2+10);
+
+    // Cloth
+    const clothCX=cx-rodLen/2+clothOffX-clothW/2+30;
+    drawCloth(ctx,clothCX,cy,clothW,clothH);
+    drawLabel(ctx,'Lã',clothCX,cy+clothH/2+8);
+
+    // Electrons
+    this.particles.forEach(p=>p.draw(ctx));
+
+    // Charge symbols on rod
+    if(this.chargeLevel>0.3){
+      const n=Math.floor(this.chargeLevel*8);
+      for(let i=0;i<n;i++){
+        const px=cx-rodLen/2+20+i*(rodLen-40)/Math.max(n-1,1);
+        drawPlusMinus(ctx,px,cy,-1,Math.min(1,this.chargeLevel*1.5));
+      }
+    }
+    // Charge symbols on cloth
+    if(this.phase==='charged'){
+      for(let i=0;i<4;i++){
+        drawPlusMinus(ctx,clothCX-20+i*14,cy,+1,1);
+      }
+      // Labels
+      ctx.save();
+      ctx.font='bold 13px Electrolize';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#74b9ff';ctx.shadowBlur=15;ctx.shadowColor='#74b9ff44';
+      ctx.fillText('CARGA NEGATIVA',cx,cy-rodThick/2-24);
+      ctx.fillStyle='#ff6b6b';ctx.shadowColor='#ff6b6b44';
+      ctx.fillText('CARGA POSITIVA',clothCX,cy-clothH/2-18);
+      ctx.restore();
+    }
+
+    // Idle hint
+    if(this.phase==='idle'){
+      ctx.save();ctx.globalAlpha=0.4;
+      ctx.font='13px Outfit';ctx.textAlign='center';ctx.fillStyle='#6a90b0';
+      ctx.fillText('↓ Use os controles abaixo para iniciar',cx,cy+80);
+      ctx.restore();
+    }
+  }
+};
+
+// ── EXP 2: INDUÇÃO ────────────────────────────────────────
+const expInducao={
+  name:'ELETRIZAÇÃO POR INDUÇÃO',
+  subtitle:'Redistribuição de cargas por influência eletrostática',
+  num:'EXP-02 / 04',
+  info:'Um corpo eletrizado, sem tocar outro corpo neutro, provoca redistribuição das cargas nesse corpo. Com o aterramento e posterior remoção do corpo indutor, o corpo neutro fica eletrizado com carga oposta.',
+  theory:`<h4>Indução Eletrostática</h4>
+    <p>Quando um condutor neutro é aproximado de um corpo carregado, ocorre redistribuição das cargas livres no interior do condutor. As cargas de sinal oposto ao indutor migram para a face próxima (face induzida) e as de mesmo sinal para a face distal.</p>
+    <p class="formula">Campo elétrico: E⃗ = kQ/r² (lei de Coulomb)</p>
+    <p>Ao aterrar o condutor enquanto o indutor está próximo, as cargas de mesmo sinal escoam para a terra. Removendo o aterramento e depois o indutor, o condutor fica com carga líquida oposta à do indutor.</p>`,
+  phase:'idle', // idle → approaching → grounded → no_ground → no_rod
+  rodPos:0,
+  charges:[],
+  ats:false,
+
+  init(){
+    this.phase='idle';this.rodPos=0;this.ats=false;
+    this.charges=this.buildCharges(0);
+  },
+
+  buildCharges(indent){
+    const charges=[];
+    // distribute in sphere: left side positive when rod nearby (negative rod)
+    for(let i=0;i<12;i++){
+      const ang=(i/12)*Math.PI*2;
+      const r=28;
+      const bx=Math.cos(ang)*r;const by=Math.sin(ang)*r;
+      // shift charges based on indent (rod proximity factor 0-1)
+      const shiftX=indent*22;
+      const type=bx<0?-1:1; // left=negative (attracted), right=positive (repelled)
+      charges.push({bx,by,shiftX:type<0?-shiftX:shiftX,type});
+    }
+    return charges;
+  },
+
+  update(dt){},
+
+  buttons(){
+    if(this.phase==='idle') return [{id:'approach',label:'⟶ Aproximar Bastão',cls:'btn-primary'}];
+    if(this.phase==='approaching') return [
+      {id:'ground',label:'⏚ Aterrar Esfera',cls:'btn-warning'},
+      {id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'},
+    ];
+    if(this.phase==='grounded') return [
+      {id:'rm_ground',label:'✕ Remover Aterramento',cls:'btn-warning'},
+      {id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'},
+    ];
+    if(this.phase==='no_ground') return [
+      {id:'rm_rod',label:'⟵ Afastar Bastão',cls:'btn-primary'},
+      {id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'},
+    ];
+    return [{id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'}];
+  },
+
+  action(id){
+    if(id==='approach'&&this.phase==='idle') this.phase='approaching';
+    if(id==='ground'&&this.phase==='approaching') this.phase='grounded';
+    if(id==='rm_ground'&&this.phase==='grounded') this.phase='no_ground';
+    if(id==='rm_rod'&&this.phase==='no_ground') this.phase='no_rod';
+    if(id==='reset') this.init();
+    renderButtons();renderStepDesc();
+  },
+
+  stepDesc(){
+    if(this.phase==='idle') return {label:'PASSO 01',text:'Clique em <em>Aproximar Bastão</em> para aproximar o bastão carregado negativamente da esfera condutora neutra.'};
+    if(this.phase==='approaching') return {label:'PASSO 02',text:'Observe a redistribuição de cargas na esfera. Agora <em>Aterre a esfera</em> com um fio condutor.'};
+    if(this.phase==='grounded') return {label:'PASSO 03',text:'Com o aterramento, cargas positivas saíram pela terra. <em>Remova o aterramento</em> mantendo o bastão próximo.'};
+    if(this.phase==='no_ground') return {label:'PASSO 04',text:'Aterramento removido. Agora <em>afaste o bastão</em> para ver o resultado da eletrização por indução.'};
+    return {label:'RESULTADO',text:'A esfera ficou com <strong style="color:#ff6b6b">carga positiva</strong> — sinal oposto ao do indutor. Isso é a eletrização por indução: sem contato direto!'};
+  },
+
+  chargeHtml(){
+    if(this.phase==='no_rod') return `<div class="charge-badge charge-pos visible">⊕ ESFERA POSITIVA</div>`;
+    if(this.phase==='approaching'||this.phase==='grounded'||this.phase==='no_ground')
+      return `<div class="charge-badge charge-neg visible">⊖ BASTÃO NEGATIVO</div>`;
+    return '';
+  },
+
+  draw(){
+    const cx=W/2,cy=H/2;
+    const sphR=55;
+    const sphX=cx+60;
+
+    // Rod
+    const rodTargetX=this.phase==='idle'?cx-220:this.phase==='no_rod'?cx-250:cx-sphR-140;
+    const animRodX=rodTargetX;
+    const rodLen=120,rodThick=22;
+    if(this.phase!=='no_rod'){
+      drawGlassRod(ctx,animRodX-rodLen/2+rodLen,cy,rodLen,rodThick,1);
+      // Multiple minus signs on rod
+      for(let i=0;i<5;i++){
+        drawPlusMinus(ctx,animRodX-rodLen/2+15+i*20,cy,-1,0.9);
+      }
+      drawLabel(ctx,'Bastão de Vidro (−)',animRodX,cy+rodThick/2+12,'rgba(116,185,255,0.7)');
+    }
+
+    // Sphere stand
+    ctx.save();ctx.strokeStyle='rgba(100,130,160,0.4)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(sphX,cy+sphR);ctx.lineTo(sphX,cy+sphR+40);ctx.stroke();
+    // base
+    ctx.beginPath();ctx.ellipse(sphX,cy+sphR+42,28,6,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,90,120,0.6)';ctx.fill();ctx.restore();
+
+    // Charges inside sphere
+    const proximity=this.phase==='idle'?0:1;
+    const sym=[];
+    const chargePositions=[];
+
+    if(this.phase==='idle'){
+      // neutral: alternating +/-
+      for(let i=0;i<8;i++){
+        const ang=(i/8)*Math.PI*2;
+        sym.push({x:sphX+Math.cos(ang)*32,y:cy+Math.sin(ang)*32,type:i%2===0?1:-1});
+      }
+    } else if(this.phase==='approaching'){
+      // left side: negative (attracted), right: positive (repelled)
+      for(let i=0;i<4;i++){const ang=-Math.PI/4+i*Math.PI/6-0.2;sym.push({x:sphX-28+Math.cos(ang)*14,y:cy+Math.sin(ang)*22,type:-1});}
+      for(let i=0;i<4;i++){const ang=-Math.PI/4+i*Math.PI/6;sym.push({x:sphX+24+Math.cos(ang)*14,y:cy+Math.sin(ang)*22,type:+1});}
+    } else if(this.phase==='grounded'||this.phase==='no_ground'){
+      // Only positive charges remain (negative ones drained via ground)
+      for(let i=0;i<6;i++){const ang=(i/6)*Math.PI*2;sym.push({x:sphX+Math.cos(ang)*36,y:cy+Math.sin(ang)*36,type:+1});}
+    } else if(this.phase==='no_rod'){
+      // uniformly positive
+      for(let i=0;i<6;i++){const ang=(i/6)*Math.PI*2;sym.push({x:sphX+Math.cos(ang)*36,y:cy+Math.sin(ang)*36,type:+1});}
+    }
+
+    const sphCharge=this.phase==='no_rod'?1:(this.phase==='grounded'||this.phase==='no_ground')?0.5:0;
+    drawSphere(ctx,sphX,cy,sphR,sphCharge,sym);
+    drawLabel(ctx,'Esfera Condutora',sphX,cy+sphR+50);
+
+    // Ground wire
+    if(this.phase==='grounded'){
+      drawGround(ctx,sphX+sphR+10,cy);
+      ctx.save();ctx.strokeStyle='rgba(100,180,100,0.8)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(sphX+sphR,cy);ctx.lineTo(sphX+sphR+10,cy);ctx.stroke();
+      ctx.restore();
+      // Show electrons draining
+      ctx.save();ctx.font='13px Electrolize';ctx.fillStyle='#74b9ff';
+      ctx.textAlign='center';ctx.fillText('e⁻ →',sphX+sphR+30,cy-12);ctx.restore();
+    }
+
+    // Field lines from rod to sphere
+    if(this.phase==='approaching'||this.phase==='grounded'||this.phase==='no_ground'){
+      ctx.save();ctx.setLineDash([4,6]);ctx.strokeStyle='rgba(0,212,255,0.15)';ctx.lineWidth=1;
+      const rodEdge=animRodX+rodLen/2;
+      for(let i=-2;i<=2;i++){
+        ctx.beginPath();ctx.moveTo(rodEdge,cy+i*8);ctx.lineTo(sphX-sphR-2,cy+i*8);ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+};
+
+// ── EXP 3: CONTATO ────────────────────────────────────────
+const expContato={
+  name:'ELETRIZAÇÃO POR CONTATO',
+  subtitle:'Compartilhamento de cargas entre corpos condutores em contato',
+  num:'EXP-03 / 04',
+  info:'Quando um corpo eletrizado toca um corpo neutro, as cargas se redistribuem entre os dois corpos. Se as esferas forem idênticas, cada uma ficará com metade da carga total.',
+  theory:`<h4>Compartilhamento de Cargas</h4>
+    <p>No contato entre dois condutores, as cargas se redistribuem até que o potencial elétrico em ambos seja igual. Para duas esferas idênticas, a carga final em cada uma é Q/2.</p>
+    <p class="formula">V₁ = V₂ → Q₁/C₁ = Q₂/C₂ (equilíbrio de potencial)</p>
+    <p>Para esferas de raios diferentes: Q₁' = Q·r₁/(r₁+r₂) e Q₂' = Q·r₂/(r₁+r₂), onde r₁ e r₂ são os raios das esferas.</p>`,
+  phase:'idle', // idle → approaching → contact → separating → done
+  anim:0,
+  particles:[],
+
+  init(){this.phase='idle';this.anim=0;this.particles=[];},
+
+  update(dt){
+    if(this.phase==='approaching'||this.phase==='contact'||this.phase==='separating'){
+      this.anim=Math.min(1,this.anim+dt*0.6);
+      // Emit particles during contact
+      if(this.phase==='contact'&&Math.random()<0.25){
+        const cx=W/2;const cy=H/2;
+        this.particles.push(new Particle(
+          cx-35,cy+Math.random()*30-15,
+          cx+35,cy+Math.random()*30-15,
+          '#74b9ff',0.04,3
+        ));
+      }
+      this.particles.forEach(p=>p.update());
+      this.particles=this.particles.filter(p=>!p.done);
+      if(this.anim>=1){
+        if(this.phase==='approaching') this.phase='contact';
+        else if(this.phase==='separating') this.phase='done';
+      }
+    }
+  },
+
+  buttons(){
+    if(this.phase==='idle') return [{id:'approach',label:'⟶ Aproximar Esferas',cls:'btn-primary'}];
+    if(this.phase==='contact') return [{id:'separate',label:'⟵⟶ Separar Esferas',cls:'btn-primary'}];
+    if(this.phase==='done') return [{id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'}];
+    return [];
+  },
+
+  action(id){
+    if(id==='approach'&&this.phase==='idle'){this.phase='approaching';this.anim=0;}
+    if(id==='separate'&&this.phase==='contact'){this.phase='separating';this.anim=0;}
+    if(id==='reset') this.init();
+    renderButtons();renderStepDesc();
+  },
+
+  stepDesc(){
+    if(this.phase==='idle') return {label:'PASSO 01',text:'Esfera A está carregada negativamente. Esfera B está neutra. Clique em <em>Aproximar Esferas</em> para colocá-las em contato.'};
+    if(this.phase==='approaching') return {label:'EM ANDAMENTO',text:'As esferas estão se aproximando...'};
+    if(this.phase==='contact') return {label:'PASSO 02',text:'Esferas em <strong>contato</strong>! Observe os elétrons se redistribuindo entre as duas esferas. Clique em <em>Separar Esferas</em>.'};
+    if(this.phase==='separating') return {label:'EM ANDAMENTO',text:'Separando as esferas...'};
+    return {label:'RESULTADO',text:'Cada esfera ficou com <strong>Q/2</strong> de carga negativa. Para esferas idênticas, a carga se divide igualmente. Isso é a eletrização por contato!'};
+  },
+
+  chargeHtml(){
+    if(this.phase==='done') return `<div class="charge-badge charge-neg visible">⊖ ESFERA A: Q/2</div><div class="charge-badge charge-neg visible">⊖ ESFERA B: Q/2</div>`;
+    if(this.phase!=='idle') return `<div class="charge-badge charge-neg visible">⊖ ESFERA A: −Q</div><div class="charge-badge charge-neutral visible">○ ESFERA B: 0</div>`;
+    return `<div class="charge-badge charge-neg visible">⊖ ESFERA A: −Q</div><div class="charge-badge charge-neutral visible">○ ESFERA B: 0</div>`;
+  },
+
+  draw(){
+    const cx=W/2,cy=H/2;
+    const r=50;
+    // separation based on phase
+    let sep=110;
+    if(this.phase==='approaching') sep=110-this.anim*60;
+    else if(this.phase==='contact') sep=50;
+    else if(this.phase==='separating') sep=50+this.anim*70;
+    else if(this.phase==='done') sep=120;
+
+    const axPos=cx-sep,bxPos=cx+sep;
+    const aCharge=this.phase==='done'?0.5:1;
+    const bCharge=this.phase==='done'?0.5:0;
+
+    // Charge symbols for A
+    const aSymbols=[];
+    const bSymbols=[];
+    const nc=this.phase==='done'?4:this.phase==='contact'?3:6;
+    for(let i=0;i<nc;i++){
+      const ang=(i/nc)*Math.PI*2;
+      aSymbols.push({x:axPos+Math.cos(ang)*32,y:cy+Math.sin(ang)*32,type:-1});
+    }
+    if(this.phase==='done'||this.phase==='contact'){
+      const nb=this.phase==='done'?4:2;
+      for(let i=0;i<nb;i++){
+        const ang=(i/nb)*Math.PI*2;
+        bSymbols.push({x:bxPos+Math.cos(ang)*32,y:cy+Math.sin(ang)*32,type:-1});
+      }
+    }
+
+    drawSphere(ctx,axPos,cy,r,-aCharge,aSymbols);
+    drawLabel(ctx,'Esfera A (−Q)',axPos,cy+r+14);
+    drawSphere(ctx,bxPos,cy,r,-bCharge,bSymbols);
+    drawLabel(ctx,'Esfera B (neutra)',bxPos,cy+r+14);
+
+    // Contact line
+    if(this.phase==='contact'){
+      ctx.save();ctx.strokeStyle='rgba(116,185,255,0.5)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(axPos+r,cy);ctx.lineTo(bxPos-r,cy);ctx.stroke();ctx.restore();
+    }
+
+    // Particles
+    this.particles.forEach(p=>p.draw(ctx));
+
+    // Done labels
+    if(this.phase==='done'){
+      ctx.save();ctx.font='bold 13px Electrolize';ctx.textAlign='center';ctx.fillStyle='#74b9ff';
+      ctx.shadowBlur=12;ctx.shadowColor='#74b9ff44';
+      ctx.fillText('Q/2',axPos,cy-r-18);ctx.fillText('Q/2',bxPos,cy-r-18);ctx.restore();
+    }
+  }
+};
+
+// ── EXP 4: ELETROSCÓPIO ───────────────────────────────────
+const expEletroscopio={
+  name:'ELETROSCÓPIO DE FOLHAS',
+  subtitle:'Detector de cargas elétricas por repulsão de folhas metálicas',
+  num:'EXP-04 / 04',
+  info:'O eletroscópio detecta a presença de cargas elétricas. Quando um corpo eletrizado se aproxima ou toca o disco superior, as folhas de ouro se repelem, abrindo-se. Quanto maior a carga, maior o ângulo de abertura.',
+  theory:`<h4>Princípio de Funcionamento</h4>
+    <p>O eletroscópio é formado por um disco/haste metálica e duas folhas de ouro presas em sua extremidade inferior, isoladas do exterior por um frasco de vidro. Ao ser eletrizado, as cargas se distribuem pelo sistema e as folhas adquirem cargas de mesmo sinal, repelindo-se mutuamente.</p>
+    <p class="formula">F = kQ₁Q₂/r² (Lei de Coulomb — repulsão entre cargas iguais)</p>
+    <p>A abertura das folhas é proporcional à carga presente. O eletroscópio pode ser eletrizado por indução (aproximação) ou por contato (toque), e o tipo de carga pode ser determinado por testes adicionais.</p>`,
+  phase:'idle',
+  leafAngle:0,
+  targetAngle:0,
+  rodPos:0,
+  targetRodX:0,
+  charge:0,
+  animT:0,
+
+  init(){this.phase='idle';this.leafAngle=0;this.targetAngle=0;this.charge=0;this.animT=0;},
+
+  update(dt){
+    // Smooth leaf animation
+    this.leafAngle+=(this.targetAngle-this.leafAngle)*dt*5;
+    if(this.phase==='approaching'){this.targetAngle=0.38;}
+    else if(this.phase==='touching'){this.targetAngle=0.62;}
+    else if(this.phase==='grounded'){this.targetAngle=0.05;}
+    else if(this.phase==='charged'){this.targetAngle=0.58;}
+    else{this.targetAngle=0.02;}
+  },
+
+  buttons(){
+    if(this.phase==='idle') return [{id:'approach',label:'🪄 Aproximar Bastão',cls:'btn-primary'}];
+    if(this.phase==='approaching') return [
+      {id:'touch',label:'👆 Tocar o Disco',cls:'btn-primary'},
+      {id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'},
+    ];
+    if(this.phase==='touching') return [
+      {id:'ground',label:'⏚ Aterrar',cls:'btn-warning'},
+      {id:'afastar',label:'⟵ Afastar Bastão',cls:'btn-secondary'},
+    ];
+    if(this.phase==='grounded') return [{id:'rm_ground',label:'✕ Remover Aterramento',cls:'btn-primary'}];
+    if(this.phase==='charged') return [{id:'reset',label:'↺ Reiniciar',cls:'btn-secondary'}];
+    return [];
+  },
+
+  action(id){
+    if(id==='approach'&&this.phase==='idle') this.phase='approaching';
+    if(id==='touch'&&this.phase==='approaching') this.phase='touching';
+    if(id==='ground'&&this.phase==='touching'){this.phase='grounded';}
+    if(id==='rm_ground'&&this.phase==='grounded'){this.phase='charged';}
+    if(id==='afastar'&&this.phase==='touching'){this.phase='charged';}
+    if(id==='reset') this.init();
+    renderButtons();renderStepDesc();
+  },
+
+  stepDesc(){
+    if(this.phase==='idle') return {label:'PASSO 01',text:'O eletroscópio está neutro — folhas fechadas. Clique em <em>Aproximar Bastão</em> para aproximar um corpo eletrizado.'};
+    if(this.phase==='approaching') return {label:'PASSO 02',text:'As folhas abrem por <strong>indução</strong>! Clique em <em>Tocar o Disco</em> para eletrizar por contato, ou afaste o bastão para ver as folhas fecharem.'};
+    if(this.phase==='touching') return {label:'PASSO 03',text:'Bastão tocou o disco: carga transferida. Você pode <em>Aterrar</em> o eletroscópio ou <em>Afastar</em> o bastão.'};
+    if(this.phase==='grounded') return {label:'PASSO 04',text:'Aterrado! Cargas escoaram para a terra — folhas fechadas. <em>Remova o aterramento</em>.'};
+    return {label:'RESULTADO',text:'Eletroscópio carregado! As folhas permanecem abertas mesmo sem o bastão. A abertura é proporcional à carga presente.'};
+  },
+
+  chargeHtml(){
+    const ang=this.leafAngle;
+    if(ang<0.05) return `<div class="charge-badge charge-neutral visible">○ NEUTRO</div>`;
+    if(ang>0.4) return `<div class="charge-badge charge-neg visible">⊖ CARREGADO</div>`;
+    return `<div class="charge-badge charge-neg visible">⊖ INDUZIDO</div>`;
+  },
+
+  draw(){
+    const ecX=W/2+40,ecY=H/2-10;
+
+    // Draw charged rod on the left when approaching or touching
+    if(this.phase==='approaching'||this.phase==='touching'){
+      const rodX=this.phase==='touching'?ecX-90:ecX-150;
+      drawRod(ctx,rodX,ecY-55,120,22,1,true);
+      for(let i=0;i<4;i++) drawPlusMinus(ctx,rodX-40+i*26,ecY-55,+1,0.9);
+      drawLabel(ctx,'Bastão (+)',rodX,ecY-55+22,'rgba(255,107,107,0.7)');
+    }
+
+    // Ground wire
+    if(this.phase==='grounded'){
+      drawGround(ctx,ecX+55,ecY-45);
+      ctx.save();ctx.strokeStyle='rgba(100,180,100,0.8)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(ecX+45,ecY-52);ctx.lineTo(ecX+55,ecY-52);ctx.stroke();ctx.restore();
+    }
+
+    // Electroscope
+    const charge=this.phase==='approaching'?-0.5:
+      (this.phase==='touching'||this.phase==='charged')?-1:
+      this.phase==='grounded'?0:0;
+    drawElectroscope(ctx,ecX,ecY,this.leafAngle,charge);
+    drawLabel(ctx,'Eletroscópio de Folhas de Ouro',ecX,ecY+80);
+
+    // Angle label
+    if(this.leafAngle>0.1){
+      const deg=Math.round(this.leafAngle*180/Math.PI*1.5);
+      ctx.save();
+      ctx.font='bold 12px Space Mono';ctx.textAlign='center';ctx.fillStyle='#ffd700';
+      ctx.shadowBlur=8;ctx.shadowColor='#ffd70066';
+      ctx.fillText(`θ ≈ ${deg}°`,ecX+90,ecY+30);ctx.restore();
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  EXPERIMENT CONTROLLER
+// ═══════════════════════════════════════════════════════════
+
+const experiments={atrito:expAtrito,inducao:expInducao,contato:expContato,eletroscopio:expEletroscopio};
+let currentExpKey='atrito';
+let currentExp=expAtrito;
+
+function selectExperiment(key){
+  currentExpKey=key;
+  currentExp=experiments[key];
+  currentExp.init();
+  // UI updates
+  document.querySelectorAll('.exp-item').forEach(el=>{
+    el.classList.toggle('active',el.dataset.exp===key);
+  });
+  document.getElementById('expTitle').textContent=currentExp.name;
+  document.getElementById('expSubtitle').textContent=currentExp.subtitle;
+  document.getElementById('expNum').textContent=currentExp.num;
+  document.getElementById('sideInfoText').textContent=currentExp.info;
+  document.getElementById('theoryContent').innerHTML=currentExp.theory;
+  renderButtons();renderStepDesc();
+}
+
+function renderButtons(){
+  const area=document.getElementById('btnArea');
+  area.innerHTML='';
+  (currentExp.buttons()||[]).forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='btn '+b.cls;
+    btn.innerHTML=b.label;
+    if(b.disabled) btn.disabled=true;
+    btn.onclick=()=>{currentExp.action(b.id);};
+    area.appendChild(btn);
+  });
+}
+
+function renderStepDesc(){
+  const d=currentExp.stepDesc();
+  document.getElementById('stepLabel').textContent=d.label;
+  document.getElementById('stepDesc').innerHTML=d.text;
+  document.getElementById('chargeIndicator').innerHTML=currentExp.chargeHtml?currentExp.chargeHtml():'';
+}
+
+// Sidebar click
+document.getElementById('expList').addEventListener('click',e=>{
+  const item=e.target.closest('.exp-item');
+  if(item&&item.dataset.exp) selectExperiment(item.dataset.exp);
+});
+
+// Theory toggle
+const theoryToggle=document.getElementById('theoryToggle');
+theoryToggle.addEventListener('click',()=>{
+  const content=document.getElementById('theoryContent');
+  content.classList.toggle('visible');
+  theoryToggle.classList.toggle('open');
+});
+
+// ═══════════════════════════════════════════════════════════
+//  ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════
+
+let lastT=0;
+function frame(t){
+  const dt=Math.min((t-lastT)/1000,0.05);
+  lastT=t;
+  ctx.clearRect(0,0,W,H);
+  if(currentExp){
+    currentExp.update(dt);
+    currentExp.draw();
+    // Re-render charge display
+    const ci=document.getElementById('chargeIndicator');
+    if(ci&&currentExp.chargeHtml) ci.innerHTML=currentExp.chargeHtml();
+  }
+  requestAnimationFrame(frame);
+}
+
+// Init
+resizeCanvas();
+selectExperiment('atrito');
+document.getElementById('theoryContent').innerHTML=expAtrito.theory;
+requestAnimationFrame(frame);
+</script>
+
+</body>
+</html>
